@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /********************************************************************************************
  *                                                                                          *
@@ -7,7 +7,6 @@
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/yield        *
  *                                                                                          *
  ********************************************************************************************/
-
 
 /**
  * Returns the lines sequence of "99 Bottles of Beer" song:
@@ -33,9 +32,27 @@
  *
  */
 function* get99BottlesOfBeer() {
-    throw new Error('Not implemented');
-}
+  yield "99 bottles of beer on the wall, 99 bottles of beer.";
+  //   let count = new Array(98)
+  //     .fill(0)
+  //     .map((el, ind) => ind + 1)
+  //     .reverse();
+  //   count.map((el) => {
+  //     let countBottles = el !== 1 ? `${el} bottles` : `${el} bottle`;
+  //     yield`Take one down and pass it around, ${countBottles} of beer on the wall.`;
+  //     yield`${countBottles} of beer on the wall, ${countBottles} of beer.`;
+  //   });
 
+  for (let el = 98; el > 0; el--) {
+    let countBottles = el !== 1 ? `${el} bottles` : `${el} bottle`;
+    yield `Take one down and pass it around, ${countBottles} of beer on the wall.`;
+    yield `${countBottles} of beer on the wall, ${countBottles} of beer.`;
+  }
+
+  yield "Take one down and pass it around, no more bottles of beer on the wall.";
+  yield "No more bottles of beer on the wall, no more bottles of beer.";
+  yield "Go to the store and buy some more, 99 bottles of beer on the wall.";
+}
 
 /**
  * Returns the Fibonacci sequence:
@@ -47,9 +64,17 @@ function* get99BottlesOfBeer() {
  *
  */
 function* getFibonacciSequence() {
-    throw new Error('Not implemented');
+  let a = 0;
+  let b = 1;
+  let next = 0;
+  yield a;
+  while (true) {
+    yield b;
+    next = b;
+    b = a + b;
+    a = next;
+  }
 }
-
 
 /**
  * Traverses a tree using the depth-first strategy
@@ -82,9 +107,15 @@ function* getFibonacciSequence() {
  *
  */
 function* depthTraversalTree(root) {
-    throw new Error('Not implemented');
+  const nodes = [root];
+  while (nodes.length) {
+    const node = nodes.pop();
+    yield node;
+    if (node.children) {
+      nodes.push(...node.children.reverse());
+    }
+  }
 }
-
 
 /**
  * Traverses a tree using the breadth-first strategy
@@ -108,9 +139,18 @@ function* depthTraversalTree(root) {
  *
  */
 function* breadthTraversalTree(root) {
-    throw new Error('Not implemented');
+  let nodes = [root];
+  while (nodes.length > 0) {
+    const newNodes = [];
+    for (const node of nodes) {
+      yield node;
+      if (node.children) {
+        newNodes.push(...node.children);
+      }
+    }
+    nodes = newNodes;
+  }
 }
-
 
 /**
  * Merges two yield-style sorted sequences into the one sorted sequence.
@@ -126,14 +166,27 @@ function* breadthTraversalTree(root) {
  *   [ 1, 3, 5, ... ], [ -1 ] => [ -1, 1, 3, 5, ...]
  */
 function* mergeSortedSequences(source1, source2) {
-    throw new Error('Not implemented');
+  const generator1 = source1();
+  const generator2 = source2();
+  let a = generator1.next();
+  let b = generator2.next();
+  while (!a.done || !b.done) {
+    if (a.value < b.value || b.done) {
+      yield a.value;
+      a = generator1.next();
+    } else if (a.done || a.value >= b.value) {
+      yield b.value;
+      b = generator2.next();
+    } else {
+      return;
+    }
+  }
 }
 
-
 module.exports = {
-    get99BottlesOfBeer: get99BottlesOfBeer,
-    getFibonacciSequence: getFibonacciSequence,
-    depthTraversalTree: depthTraversalTree,
-    breadthTraversalTree: breadthTraversalTree,
-    mergeSortedSequences: mergeSortedSequences
+  get99BottlesOfBeer: get99BottlesOfBeer,
+  getFibonacciSequence: getFibonacciSequence,
+  depthTraversalTree: depthTraversalTree,
+  breadthTraversalTree: breadthTraversalTree,
+  mergeSortedSequences: mergeSortedSequences,
 };
