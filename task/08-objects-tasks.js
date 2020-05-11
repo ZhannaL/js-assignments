@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**************************************************************************************************
  *                                                                                                *
@@ -7,7 +7,6 @@
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object        *
  *                                                                                                *
  **************************************************************************************************/
-
 
 /**
  * Returns the rectagle object with width and height parameters and getArea() method
@@ -23,9 +22,12 @@
  *    console.log(r.getArea());   // => 200
  */
 function Rectangle(width, height) {
-    throw new Error('Not implemented');
+  this.width = width;
+  this.height = height;
 }
-
+Rectangle.prototype.getArea = function getArea() {
+  return this.width * this.height;
+};
 
 /**
  * Returns the JSON representation of specified object
@@ -38,9 +40,8 @@ function Rectangle(width, height) {
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
 function getJSON(obj) {
-    throw new Error('Not implemented');
+  return JSON.stringify(obj);
 }
-
 
 /**
  * Returns the object of specified type from JSON representation
@@ -54,9 +55,11 @@ function getJSON(obj) {
  *
  */
 function fromJSON(proto, json) {
-    throw new Error('Not implemented');
-}
+  const obj = JSON.parse(json);
+  const values = Object.values(obj);
 
+  return new proto.constructor(...values);
+}
 
 /**
  * Css selectors builder
@@ -106,41 +109,87 @@ function fromJSON(proto, json) {
  *  For more examples see unit tests.
  */
 
-const cssSelectorBuilder = {
-
-    element: function(value) {
-        throw new Error('Not implemented');
-    },
-
-    id: function(value) {
-        throw new Error('Not implemented');
-    },
-
-    class: function(value) {
-        throw new Error('Not implemented');
-    },
-
-    attr: function(value) {
-        throw new Error('Not implemented');
-    },
-
-    pseudoClass: function(value) {
-        throw new Error('Not implemented');
-    },
-
-    pseudoElement: function(value) {
-        throw new Error('Not implemented');
-    },
-
-    combine: function(selector1, combinator, selector2) {
-        throw new Error('Not implemented');
-    },
+const checkRepeat = (build, type) => {
+  if (build && build.find((el) => el.type === type)) {
+    throw new Error(
+      "Element, id and pseudo-element should not occur more then one time inside the selector"
+    );
+  }
+  return false;
 };
 
+const checkFollowing = (build, type) => {
+  if (build && build.find((el) => el.type === type)) {
+    throw new Error(
+      "Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element"
+    );
+  }
+  return false;
+};
+
+const cssSelectorBuilder = {
+  element(value) {
+    const el = { type: "element", value };
+    checkRepeat(this.build, "element");
+    checkFollowing(this.build, "id");
+    const build = this.build ? this.build.concat(el) : [el];
+    return { build, ...cssSelectorBuilder };
+  },
+
+  id(value) {
+    const el = { type: "id", value: `#${value}` };
+    checkRepeat(this.build, "id");
+    checkFollowing(this.build, "class");
+    checkFollowing(this.build, "pseudoElement");
+    const build = this.build ? this.build.concat(el) : [el];
+    return { build, ...cssSelectorBuilder };
+  },
+
+  class(value) {
+    const el = { type: "class", value: `.${value}` };
+    checkFollowing(this.build, "attr");
+    const build = this.build ? this.build.concat(el) : [el];
+    return { build, ...cssSelectorBuilder };
+  },
+
+  attr(value) {
+    const el = { type: "attr", value: `[${value}]` };
+    checkFollowing(this.build, "pseudoClass");
+    const build = this.build ? this.build.concat(el) : [el];
+    return { build, ...cssSelectorBuilder };
+  },
+
+  pseudoClass(value) {
+    const el = { type: "pseudoClass", value: `:${value}` };
+    checkFollowing(this.build, "pseudoElement");
+    const build = this.build ? this.build.concat(el) : [el];
+    return { build, ...cssSelectorBuilder };
+  },
+
+  pseudoElement(value) {
+    const el = { type: "pseudoElement", value: `::${value}` };
+    checkRepeat(this.build, "pseudoElement");
+    const build = this.build ? this.build.concat(el) : [el];
+    return { build, ...cssSelectorBuilder };
+  },
+
+  combine(selector1, combinator, selector2) {
+    const el = [
+      ...selector1.build,
+      { type: "combinator", value: ` ${combinator} ` },
+      ...selector2.build,
+    ];
+    const build = this.build ? this.build.concat(el) : el;
+    return { build, ...cssSelectorBuilder };
+  },
+  stringify() {
+    return this.build.map((el) => el.value).join("");
+  },
+};
 
 module.exports = {
-    Rectangle: Rectangle,
-    getJSON: getJSON,
-    fromJSON: fromJSON,
-    cssSelectorBuilder: cssSelectorBuilder
+  Rectangle: Rectangle,
+  getJSON: getJSON,
+  fromJSON: fromJSON,
+  cssSelectorBuilder: cssSelectorBuilder,
 };

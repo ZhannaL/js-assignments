@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Returns the array of 32 compass points and heading.
@@ -17,10 +17,50 @@
  *  ]
  */
 function createCompassPoints() {
-    throw new Error('Not implemented');
-    var sides = ['N','E','S','W'];  // use array of cardinal directions only!
-}
+  const sides = ["N", "E", "S", "W"]; // use array of cardinal directions only!
+  const mainWinds = sides.reduce((acc, side, ind) => {
+    acc.push(side);
+    let el = ind === 3 ? sides[0] : sides[ind + 1];
+    let wind = ind % 2 ? el + side : side + el;
+    acc.push(wind);
+    return acc;
+  }, []);
+  const halfWinds = mainWinds.reduce((acc, mainWind, ind) => {
+    acc.push(mainWind);
+    let el = ind === 7 ? mainWinds[0] : mainWinds[ind + 1];
+    let wind = ind % 2 ? el + mainWind : mainWind + el;
+    acc.push(wind);
+    return acc;
+  }, []);
+  const quarterWinds = halfWinds.reduce((acc, halfWind, ind) => {
+    acc.push(halfWind);
+    let subEl;
+    const delta = ind % 4;
+    switch (delta) {
+      case 0:
+        subEl = ind >= 12 ? halfWinds[0] : halfWinds[ind + 4];
+        acc.push(halfWind + "b" + subEl);
+        return acc;
+      case 1:
+        subEl = ind === 15 ? halfWinds[0] : halfWinds[ind + 1];
+        acc.push(subEl + "b" + halfWinds[ind - 1]);
+        return acc;
+      case 2:
+        subEl = ind >= 12 ? halfWinds[0] : halfWinds[ind + 2];
+        acc.push(halfWind + "b" + subEl);
+        return acc;
+      case 3:
+        subEl = ind === 15 ? halfWinds[0] : halfWinds[ind + 1];
+        acc.push(subEl + "b" + halfWinds[ind - 3]);
+        return acc;
+    }
+  }, []);
 
+  return quarterWinds.map((el, ind) => ({
+    abbreviation: el,
+    azimuth: ind * 11.25,
+  }));
+}
 
 /**
  * Expand the braces of the specified string.
@@ -56,9 +96,8 @@ function createCompassPoints() {
  *   'nothing to do' => 'nothing to do'
  */
 function* expandBraces(str) {
-    throw new Error('Not implemented');
+  throw new Error("Not implemented");
 }
-
 
 /**
  * Returns the ZigZag matrix
@@ -88,9 +127,8 @@ function* expandBraces(str) {
  *
  */
 function getZigZagMatrix(n) {
-    throw new Error('Not implemented');
+  throw new Error("Not implemented");
 }
-
 
 /**
  * Returns true if specified subset of dominoes can be placed in a row accroding to the game rules.
@@ -113,9 +151,8 @@ function getZigZagMatrix(n) {
  *
  */
 function canDominoesMakeRow(dominoes) {
-    throw new Error('Not implemented');
+  throw new Error("Not implemented");
 }
-
 
 /**
  * Returns the string expression of the specified ordered list of integers.
@@ -137,13 +174,13 @@ function canDominoesMakeRow(dominoes) {
  * [ 1, 2, 4, 5]          => '1,2,4,5'
  */
 function extractRanges(nums) {
-    throw new Error('Not implemented');
+  throw new Error("Not implemented");
 }
 
 module.exports = {
-    createCompassPoints : createCompassPoints,
-    expandBraces : expandBraces,
-    getZigZagMatrix : getZigZagMatrix,
-    canDominoesMakeRow : canDominoesMakeRow,
-    extractRanges : extractRanges
+  createCompassPoints: createCompassPoints,
+  expandBraces: expandBraces,
+  getZigZagMatrix: getZigZagMatrix,
+  canDominoesMakeRow: canDominoesMakeRow,
+  extractRanges: extractRanges,
 };
